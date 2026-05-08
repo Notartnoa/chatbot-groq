@@ -51,9 +51,9 @@ function ChatInput({ onSend, isLoading }: ChatInputProps) {
             </svg>
           </button>
         </div>
-        <p className="input-hint">
+        {/* <p className="input-hint">
           Tekan <kbd>Enter</kbd> untuk kirim · PACE // AI fokus pada panduan lari dan kebugaran
-        </p>
+        </p> */}
       </div>
     </div>
   );
