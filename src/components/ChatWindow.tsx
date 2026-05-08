@@ -1,45 +1,155 @@
-import { useEffect, useRef } from "react"; 
-import type { Message } from "../types/Message"; 
-import chatbotConfig from "../config/chatbotConfig"; 
-  
-interface ChatWindowProps { 
-  messages: Message[]; 
-  isLoading: boolean; 
-} 
-  
-function ChatWindow({ messages, isLoading }: ChatWindowProps) { 
-  const bottomRef = useRef<HTMLDivElement>(null); 
-  
-  useEffect(() => { 
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" }); 
-  }, [messages]); 
-  
-  return ( 
-    <div className="chat-window"> 
-      {messages.length === 0 && ( 
-        <div className="message model welcome"> 
-          <strong>{chatbotConfig.botName}:</strong> 
-          <p>{chatbotConfig.welcomeMessage}</p> 
-        </div> 
-      )} 
-      {messages.map((msg, i) => ( 
-        <div key={i} className={`message ${msg.role}`}> 
-          <strong> 
-            {msg.role === "user" ? "Anda" : chatbotConfig.botName}: 
-          </strong> 
-          <p>{msg.content}</p> 
-        </div> 
-      ))} 
-      {isLoading && ( 
-        <div className="message model"> 
-          <strong>{chatbotConfig.botName}:</strong> 
-          <p>Sedang mengetik...</p> 
-        </div> 
-      )} 
-      <div ref={bottomRef} /> 
-    </div> 
-  ); 
-} 
-  
-export default ChatWindow; 
-  
+import { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import type { Message } from "../types/Message";
+
+interface ChatWindowProps {
+  messages: Message[];
+  isLoading: boolean;
+}
+
+function ChatWindow({ messages, isLoading }: ChatWindowProps) {
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
+
+  const formatTime = () => {
+    return new Date().toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  return (
+    <>
+      <div className="chat-content">
+        {/* Welcome Card */}
+        {messages.length === 0 && (
+          <div className="welcome-card">
+            <div className="welcome-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 8V12L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9 2H15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <h2>Siap Taklukkan 5K Pertamamu?</h2>
+            <p>PACE // AI akan memandu program latihanmu dari langkah pertama hingga garis finish. Yuk, mulai persiapannya!</p>
+            <div className="welcome-suggestions">
+              <span>Topik Populer:</span>
+              <div className="suggestion-chips">
+                <button className="chip">Cara bernapas saat lari</button>
+                <button className="chip">Pemanasan yang benar</button>
+                <button className="chip">Rekomendasi sepatu lari</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {messages.length > 0 && (
+          <div className="date-divider">
+            <span>Sesi Hari Ini</span>
+          </div>
+        )}
+
+        {messages.map((msg, i) => (
+          <div key={i} className={`message-group ${msg.role}`}>
+            {msg.role === "model" && (
+              <div className="message-sender-label">PACE // AI</div>
+            )}
+            <div className="message-row">
+              {msg.role === "model" && (
+                <div className="message-avatar bot">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              )}
+              <div className="bubble-wrap">
+                <div className="message-bubble">
+                  {msg.role === "model" ? (
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => (
+                          <p style={{ margin: "0 0 8px 0", lineHeight: "1.6" }}>{children}</p>
+                        ),
+                        strong: ({ children }) => (
+                          <strong style={{ color: "#FF5E00", fontWeight: 700 }}>{children}</strong>
+                        ),
+                        em: ({ children }) => (
+                          <em style={{ color: "#A1A1AA" }}>{children}</em>
+                        ),
+                        ul: ({ children }) => (
+                          <ul style={{ paddingLeft: "20px", margin: "6px 0" }}>{children}</ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol style={{ paddingLeft: "20px", margin: "6px 0" }}>{children}</ol>
+                        ),
+                        li: ({ children }) => (
+                          <li style={{ marginBottom: "4px", lineHeight: "1.6" }}>{children}</li>
+                        ),
+                        h1: ({ children }) => (
+                          <h1 style={{ fontSize: "18px", fontWeight: 800, color: "#F8FAFC", margin: "12px 0 6px" }}>{children}</h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 style={{ fontSize: "16px", fontWeight: 700, color: "#F8FAFC", margin: "10px 0 4px" }}>{children}</h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#A1A1AA", margin: "8px 0 4px" }}>{children}</h3>
+                        ),
+                        code: ({ children }) => (
+                          <code style={{
+                            background: "rgba(255,94,0,0.1)",
+                            color: "#FF5E00",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            fontSize: "13px",
+                            fontFamily: "monospace"
+                          }}>{children}</code>
+                        ),
+                        hr: () => (
+                          <hr style={{ border: "none", borderTop: "1px solid rgba(255,255,255,0.08)", margin: "12px 0" }} />
+                        ),
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  ) : (
+                    msg.content
+                  )}
+                </div>
+                <div className="message-meta">{formatTime()}</div>
+              </div>
+              {msg.role === "user" && (
+                <div className="message-avatar user">R</div>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {isLoading && (
+          <div className="message-group model">
+            <div className="message-sender-label">PACE // AI</div>
+            <div className="message-row">
+              <div className="message-avatar bot">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div className="typing-bubble">
+                <div className="typing-dot" />
+                <div className="typing-dot" />
+                <div className="typing-dot" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} style={{ float: "left", clear: "both" }} />
+      </div>
+    </>
+  );
+}
+
+export default ChatWindow;
